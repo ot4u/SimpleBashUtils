@@ -1,6 +1,12 @@
-SOURSE=cat/s21_cat.c
-GCC=gcc -Wall -Werror -Wextra
+PATH=cat/cat.c cat/cat_functions.c -o cat/s21_cat
+FLAGS=gcc
 all: s21_cat
 
 s21_cat:
-	$(GCC) $(SOURSE)
+	$(FLAGS) $(PATH)
+rebuild: clean all
+
+start:
+	cat/./s21_cat
+clean:
+	rm -rf cat/s21_cat
