@@ -1,14 +1,15 @@
-PATH=cat.c -o s21_cat
 CC=gcc
+FLAGS=-Wall -Werror -Wextra
 all: s21_cat
 
+
 s21_cat:
-	$(CC) $(PATH)
+	$(CC) $(FLAGS) cat.c -o s21_cat
 
 check:
-	clang-format -n *.c
-
-rebuild: clean all
+	clang-format -i *.c *.h
 
 clean:
 	rm -rf s21_cat
+
+rebuild: clean all
