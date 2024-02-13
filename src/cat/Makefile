@@ -8,6 +8,7 @@ s21_cat:
 
 check:
 	clang-format -i *.c *.h
+	cppcheck --enable=all --suppress=missingIncludeSystem *.c *.h
 
 clean:
 	rm -rf s21_cat
