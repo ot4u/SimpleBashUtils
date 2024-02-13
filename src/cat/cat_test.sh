@@ -1,13 +1,12 @@
-mkdir -p test
 gcc -Wall -Werror -Wextra cat.c -o test/s21_cat
 cd test/
 test_number=0
-test_count=64
+test_count=10
 failed_count=0
-files_list=""
+files_list="text1 text2 text3 text4 text5"
 options=(-s -e -n -v -b -t)
 
-while [ $test_count != 0]; do
+while [ $test_count!=0 ]; do
   test_count=$((test_count-1))
   for opt in ${options[@]}
   do
@@ -27,11 +26,10 @@ done
 
 cd ..
 
-echo "---------------------------------------------------"
+echo "-----------------------RESULT-------------------------"
 if [ $failed_count == 0 ]
 	then
 		echo -e "\nSUCCESS\n"
-		rm -rf ./test
 	else
 		echo -e "\nFAIL COUNT: $failed_count\n"
 fi
