@@ -4,7 +4,7 @@ all: s21_grep
 
 
 s21_grep:
-	$(CC) $(FLAGS) grep.c -o s21_cat
+	$(CC) $(FLAGS) grep.c -o s21_grep
 
 check:
 	clang-format -i *.c *.h
