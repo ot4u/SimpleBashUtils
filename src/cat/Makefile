@@ -1,5 +1,6 @@
 CC=gcc
 FLAGS=-Wall -Werror -Wextra
+
 all: s21_cat
 
 s21_cat:
@@ -16,6 +17,6 @@ clean:
 	rm -rf s21_cat
 	rm -rf test/s21_cat
 	rm -rf test/cat_res
-	rm -rf test/s21_res
+	rm -rf test/s21_cat_res
 
 rebuild: clean all
