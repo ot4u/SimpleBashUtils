@@ -16,8 +16,8 @@ typedef struct options {
 void read_file(int argc, char *argv[], options *cur_opt);
 void print(FILE *fp, options *cur_opt);
 void parse_options(int argc, char *argv[], options *cur_opt);
-void execute_options(int *c, int *prev, options *cur_opt, FILE *fp);
+void execute_options(int *c, int prev, options *cur_opt, FILE *fp);
 void count_empty_lines(int c, int prev, options *cur_opt);
 void compress_lines(int *c, FILE *fp, options *cur_opt);
 void count_lines(int prev, options *cur_opt);
-void execute_flags_et(int *c, options *cur_opt);
+void execute_flags_et(int *c, options cur_opt, int prev);

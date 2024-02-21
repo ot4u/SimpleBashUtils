@@ -17,33 +17,6 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void read_file(int argc, char *argv[], options *cur_opt) {
-  int i = optind ? optind : 1;
-  for (; i < argc; i++) {
-    FILE *f = fopen(argv[i], "r");
-    if (f) {
-      print(f, cur_opt);
-      fclose(f);
-    } else {
-      printf("cat: %s: No such file or directory\n", argv[i]);
-    }
-  }
-}
-
-void print(FILE *f, options *cur_opt) {
-  int c;
-  int prev = '\n';
-  if (cur_opt) {
-    cur_opt->empty_lines = 0;
-    cur_opt->cnt = 1;
-  }
-  while ((c = fgetc(f)) != EOF) {
-    if (cur_opt) execute_options(&c, &prev, cur_opt, f);
-    if (c != EOF) fputc(c, stdout);
-    prev = c;
-  }
-}
-
 void parse_options(int argc, char *argv[], options *cur_opt) {
   const struct option long_options[] = {
       {"number-nonblank", no_argument, NULL, 'b'},
@@ -86,12 +59,39 @@ void parse_options(int argc, char *argv[], options *cur_opt) {
   }
 }
 
-void execute_options(int *c, int *prev, options *cur_opt, FILE *f) {
-  count_empty_lines(*c, *prev, cur_opt);
+void read_file(int argc, char **argv, options *cur_opt) {
+  int i = optind ? optind : 1;
+  for (; i < argc; i++) {
+    FILE *f = fopen(argv[i], "r");
+    if (f) {
+      print(f, cur_opt);
+      fclose(f);
+    } else {
+      printf("cat: %s: No such file or directory\n", argv[i]);
+    }
+  }
+}
+
+void print(FILE *f, options *cur_opt) {
+  int c;
+  int prev = '\n';
+  if (cur_opt) {
+    cur_opt->empty_lines = 0;
+    cur_opt->cnt = 1;
+  }
+  while ((c = fgetc(f)) != EOF) {
+    if (cur_opt) execute_options(&c, prev, cur_opt, f);
+    if (c != EOF) fputc(c, stdout);
+    prev = c;
+  }
+}
+
+void execute_options(int *c, int prev, options *cur_opt, FILE *f) {
+  count_empty_lines(*c, prev, cur_opt);
   compress_lines(c, f, cur_opt);
   if (*c != EOF) {
-    count_lines(*prev, cur_opt);
-    execute_flags_et(c, cur_opt);
+    count_lines(prev, cur_opt);
+    execute_flags_et(c, *cur_opt, prev);
   }
 }
 
@@ -118,21 +118,29 @@ void count_lines(int prev, options *cur_opt) {
   }
 }
 
-void execute_flags_et(int *c, options *cur_opt) {
+void execute_flags_et(int *c, options cur_opt, int prev) {
   if (*c == '\n') {
-    if (cur_opt->e) printf("$");
+    if (cur_opt.e && (cur_opt.b)) {
+      if (prev == '\n') {
+        printf("%6c\t$", ' ');
+      } else {
+        printf("$");
+      }
+    } else if (cur_opt.e) {
+      printf("$");
+    }
   } else if (*c == '\t') {
-    if (cur_opt->t) {
+    if (cur_opt.t) {
       printf("^");
       *c = 'I';
     }
-  } else if (cur_opt->v) {
+  } else if (cur_opt.v) {
     if (*c <= 31) {
       printf("^");
       *c += 64;
     } else if (*c == 127) {
-      printf("M-^");
-      *c -= '?';
+      printf("^");
+      *c = '?';
     } else if (*c >= 128 && *c < 128 + 32) {
       printf("M-^");
       *c -= 64;

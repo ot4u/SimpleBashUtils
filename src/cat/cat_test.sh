@@ -13,19 +13,44 @@ do
   do
     ./s21_cat $flag $file > s21_cat_res
     cat $flag $file > cat_res
-    echo "TEST $TEST_COUNT ------------ $flag and $file"
     DIFF_RES="$(diff -s s21_cat_res cat_res)"
     if [ "$DIFF_RES" == "Files s21_cat_res and cat_res are identical" ]
     then
       SUCCESS=$((SUCCESS + 1))
-      echo "RESULT: -----SUCCESS-----"
+      echo "TEST $TEST_COUNT ------------ $flag RESULT: -----SUCCESS-----"
     else
       FAILED=$((FAILED + 1))
-      echo "RESULT: -----FAILED-----"
+      echo "TEST $TEST_COUNT ------------ $falg RESULT: -----FAILED------"
     fi
     TEST_COUNT=$((TEST_COUNT + 1))
   done
 done
+
+declare -a SPECIAL_TESTS=(
+  "-b -e -n -s -t -v TEST_FILE_2"
+  "-benstv TEST_FILE_3"
+  "-n -b TEST_FILE_3"
+  "-n -b -e TEST_FILE_3"
+  "-n -b -t -e TEST_FILE_3"
+  "-b -v -n -s TEST_FILE_3"
+)
+
+for i in "${SPECIAL_TESTS[@]}"
+do
+  ./s21_cat $i > s21_cat_res
+  cat $i > cat_res
+  DIFF_RES="$(diff -s s21_cat_res cat_res)"
+  if [ "$DIFF_RES" == "Files s21_cat_res and cat_res are identical" ]
+  then
+    SUCCESS=$((SUCCESS + 1))
+    echo "TEST $TEST_COUNT ------------ RESULT: -----SUCCESS----- $i"
+  else
+    FAILED=$((FAILED + 1))
+    echo "TEST $TEST_COUNT ------------ RESULT: -----FAILED----- $i"
+  fi
+  TEST_COUNT=$((TEST_COUNT + 1))
+done
+
 
 if [ $FAILED == 0 ]
 then
