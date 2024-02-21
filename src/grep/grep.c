@@ -67,9 +67,8 @@ void grep(options *opts, int argc, char **argv, char *buff) {
     int file_exist = 0;
     if (argc - optind > 1) file_exist = 1;
     for (int i = optind; i < argc; i++) {
-      FILE *file = fopen(argv[i], "r");
+      const FILE *file = fopen(argv[i], "r");
       if (file == NULL) {
-        file_exist = 0;
         printf("grep: %s: No such file or directory", argv[i]);
       } else {
         if (file_exist && !opts->h && !opts->l) printf("%s:", argv[i]);
@@ -86,7 +85,7 @@ int execute_f_opt(char *template, char *filename) {
     int c;
     while ((c = fgetc(file)) != EOF) {
       if (c == 13 || c == 10) template[i++] = '|';
-      if (c != 13 || c != 10) template[i++] = c;
+      if (c != 13 && c != 10) template[i++] = c;
     }
   } else {
     printf("grep: %s: No such file or directory", filename);
@@ -117,7 +116,7 @@ void processing(options *opts, FILE *file, regex_t reg, char *filename) {
   regmatch_t pmatch[1];
   while (fgets(text, BUF_SIZE - 1, file) != NULL) {
     int match = 0;
-    int success = regexec(&reg, text, 1, pmatch, 0); 
+    int success = regexec(&reg, text, 1, pmatch, 0);
     if (strchr(text, '\n') == NULL) strcat(text, "\n");
     if (success == 0 && !opts->v) match = 1;
     if (success == REG_NOMATCH && opts->v) match = 1;
@@ -144,7 +143,7 @@ void execute_o_opt(regex_t reg, options *opts, char *line) {
     int start = 0;
     while (regexec(&reg, temp, 0, NULL, 0) == opts->v && strlen(temp) > 0) {
       start--;
-      int j;
+      int j = 0;
       while (temp[j] != 0) {
         temp[j] = temp[j + 1];
         j++;

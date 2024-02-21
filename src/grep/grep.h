@@ -2,8 +2,8 @@
 #include <regex.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define BUF_SIZE 4096
 
