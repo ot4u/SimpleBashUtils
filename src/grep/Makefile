@@ -7,7 +7,6 @@ s21_grep:
 	$(CC) $(FLAGS) grep.c -o s21_grep
 
 grep_test:
-	cd test
 	bash grep_test.sh
 
 check:
@@ -16,5 +15,8 @@ check:
 
 clean:
 	rm -rf s21_grep
+	rm -rf test/grep.log
+	rm -rf test/s21_grep
+	rm -rf test/s21_grep.log
 	
 rebuild: clean all
