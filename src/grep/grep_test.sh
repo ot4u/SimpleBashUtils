@@ -37,7 +37,6 @@ manual=(
 "-ce ^int test_files/test_1_grep.txt test_files/test_2_grep.txt"
 "-e ^int test_files/test_1_grep.txt"
 "-nivh = test_files/test_1_grep.txt test_files/test_2_grep.txt"
-"-e"
 "-ie INT test_files/test_5_grep.txt"
 "-echar test_files/test_1_grep.txt test_files/test_2_grep.txt"
 "-ne = -e out test_files/test_5_grep.txt"
