@@ -9,7 +9,8 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void parse_options(int argc, char *argv[], options *opts, char *template, char *file_patt) {
+void parse_options(int argc, char *argv[], options *opts, char *template,
+                   char *file_patt) {
   int opt;
   while ((opt = getopt_long(argc, argv, "e:ivclnhsf:o", NULL, NULL)) != -1) {
     switch (opt) {
@@ -53,7 +54,8 @@ void parse_options(int argc, char *argv[], options *opts, char *template, char *
   }
 }
 
-void grep(const options *opts, int argc, char **argv, char *buff, char *file_patt) {
+void grep(const options *opts, int argc, char **argv, const char *buff,
+          char *file_patt) {
   char template[BUF_SIZE] = {0};
   int f_pattind = 0;
   if (!opts->f && !opts->e) {
@@ -65,7 +67,8 @@ void grep(const options *opts, int argc, char **argv, char *buff, char *file_pat
   if (opts->e) {
     strcat(template, buff);
   }
-  if (template[strlen(template) - 1] == '|') template[strlen(template) - 1] = '\0';
+  if (template[strlen(template) - 1] == '|')
+    template[strlen(template) - 1] = '\0';
   if (f_pattind != -1) {
     int file_exist = 0;
     if (argc - optind > 1) file_exist = 1;
@@ -85,11 +88,11 @@ int execute_f_opt(char *template, char **filename) {
       if (c != 13 && c != 10) template[i++] = c;
     }
     template[i] = '|';
+    fclose(file);
   } else {
     printf("grep: %s: No such file or directory\n", *filename);
     i = -1;
   }
-  fclose(file);
   return i;
 }
 
@@ -123,20 +126,28 @@ void processing(const options *opts, FILE *file, regex_t reg, char **filename,
     if (success == REG_NOMATCH && opts->v) match = 1;
     if (match && file_exist && !opts->h && !opts->l && !opts->c)
       printf("%s:", *filename);
-    if (match && !opts->l && !opts->c && opts->n) printf("%d:", number_line);
+    if (match && !opts->l && !opts->c && opts->n && !opts->o)
+      printf("%d:", number_line);
     if (match && !opts->l && !opts->c && !opts->o) printf("%s", text);
     if (match && opts->o && !opts->c && !opts->l)
-      execute_o_opt(reg, text, opts);
+      execute_o_opt(reg, text, opts, number_line);
     matching_lines += match;
     number_line++;
   }
   if (opts->c && opts->l && matching_lines > 0) matching_lines = 1;
   if (!file_exist && opts->c) printf("%d\n", matching_lines);
-  if (file_exist && opts->c) printf("%s:%d\n", *filename, matching_lines);
+  if (file_exist && opts->c) {
+    if (!opts->h) {
+      printf("%s:%d\n", *filename, matching_lines);
+    } else {
+      printf("%d\n", matching_lines);
+    }
+  }
   if (opts->l && matching_lines > 0) printf("%s\n", *filename);
 }
 
-void execute_o_opt(regex_t reg, char *line, const options *opts) {
+void execute_o_opt(regex_t reg, char *line, const options *opts,
+                   int number_line) {
   while (!regexec(&reg, line, 0, NULL, 0)) {
     char buf[BUF_SIZE] = "";
     strcpy(buf, line);
@@ -150,11 +161,15 @@ void execute_o_opt(regex_t reg, char *line, const options *opts) {
     right++;
     while (!regexec(&reg, buf + left, 0, NULL, 0)) left++;
     left--;
+    if (opts->n) printf("%d:", number_line);
     if (!opts->v) printf("%s\n", buf + left);
     int len = right - left + 1;
     for (int i = 0; i < len; i++) {
       line[left++] = 127;
     }
   }
-  if (opts->v) printf("%s", line);
+  if (opts->v) {
+    if (opts->n) printf("%d:", number_line);
+    printf("%s", line);
+  }
 }

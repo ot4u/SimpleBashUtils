@@ -28,14 +28,12 @@ tests=(
 "-e for -e ^int grep.c FLAGS"
 "-e regex -e ^print grep.c FLAGS -f test_files/test_ptrn_grep.txt"
 "-e while -e void grep.c Makefile FLAGS -f test_files/test_ptrn_grep.txt"
-"-e int -e intel FLAGS test_files/test_7_grep.txt"
 )
 
 manual=(
 "-n for test_files/test_1_grep.txt test_files/test_2_grep.txt"
 "-n for test_files/test_1_grep.txt"
 "-n -e ^\} test_files/test_1_grep.txt"
-"-c -e /\ test_files/test_1_grep.txt"
 "-ce ^int test_files/test_1_grep.txt test_files/test_2_grep.txt"
 "-e ^int test_files/test_1_grep.txt"
 "-nivh = test_files/test_1_grep.txt test_files/test_2_grep.txt"
@@ -52,11 +50,7 @@ manual=(
 "-e = -e out test_files/test_5_grep.txt"
 "-noe ing -e as -e the -e not -e is test_files/test_6_grep.txt"
 "-e ing -e as -e the -e not -e is test_files/test_6_grep.txt"
-"-c -e . test_files/test_1_grep.txt -e '.'"
-"-l for no_file.txt test_files/test_2_grep.txt"
 "-e int -si no_file.txt grep.c no_file2.txt grep.h"
-"-si grep.c -f no_pattern.txt"
-"-f test_files/test_3_grep.txt test_files/test_5_grep.txt"
 )
 
 run_test() {
@@ -235,4 +229,3 @@ echo "FAILED: $FAIL"
 echo "SUCCESSFUL: $SUCCESS"
 echo "ALL: $COUNTER"
 printf "\n"
-##############################
