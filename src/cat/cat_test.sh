@@ -1,61 +1,225 @@
-gcc -Wall -Werror -Wextra cat.c -o test/s21_cat
-cd test
+#!/bin/bash
 
 SUCCESS=0
-FAILED=0
-TEST_COUNT=1
-DIFF_RES=0
-FLAGS=(-b -e -n -s -t -v)
-FILES=(TEST_FILE_1 TEST_FILE_2 TEST_FILE_3 TEST_FILE_4 TEST_FILE_5)
-for flag in ${FLAGS[@]}
-do
-  for file in ${FILES[@]}
-  do
-    ./s21_cat $flag $file > s21_cat_res
-    cat $flag $file > cat_res
-    DIFF_RES="$(diff -s s21_cat_res cat_res)"
-    if [ "$DIFF_RES" == "Files s21_cat_res and cat_res are identical" ]
-    then
-      SUCCESS=$((SUCCESS + 1))
-      echo "TEST $TEST_COUNT ------------ $flag RESULT: -----SUCCESS-----"
-    else
-      FAILED=$((FAILED + 1))
-      echo "TEST $TEST_COUNT ------------ $falg RESULT: -----FAILED------"
-    fi
-    TEST_COUNT=$((TEST_COUNT + 1))
-  done
-done
+FAIL=0
+COUNTER=0
+DIFF_RES=""
 
-declare -a SPECIAL_TESTS=(
-  "-b -e -n -s -t -v TEST_FILE_2"
-  "-benstv TEST_FILE_1"
-  "-n -b TEST_FILE_3"
-  "-n -b -e TEST_FILE_4"
-  "-n -b -t -e TEST_FILE_5"
-  "-b -v -n -s TEST_FILE_3"
+s21_command=(
+    "./s21_cat"
+    )
+sys_command=(
+    "cat"
+    )
+
+flags=(
+    "b"
+    "e"
+    "n"
+    "s"
+    "t"
+    "v"
 )
-for i in "${SPECIAL_TESTS[@]}"
+
+declare -a tests=(
+"FLAGS test_files/test_1_cat.txt "
+"FLAGS test_files/test_2_cat.txt"
+"FLAGS test_files/test_3_cat.txt"
+"FLAGS test_files/test_4_cat.txt"
+"FLAGS test_files/test_5_cat.txt"
+)
+
+declare -a manual=(
+"-s test_files/test_1_cat.txt"
+"-b -e -n -s -t -v test_files/test_1_cat.txt"
+"-t test_files/test_3_cat.txt"
+"-n -b test_files/test_1_cat.txt"
+"-s -n -e test_files/test_4_cat.txt"
+"-n test_files/test_1_cat.txt"
+"-n test_files/test_1_cat.txt test_files/test_2_cat.txt"
+"-v test_files/test_5_cat.txt"
+)
+
+testing()
+{
+    param=$(echo "$@" | sed "s/FLAGS/$var/")
+    "${s21_command[@]}" $param > "${s21_command[@]}".log
+    "${sys_command[@]}" $param > "${sys_command[@]}".log
+    DIFF="$(diff -s "${s21_command[@]}".log "${sys_command[@]}".log)"
+    let "COUNTER++"
+    if [ "$DIFF" == "Files "${s21_command[@]}".log and "${sys_command[@]}".log are identical" ]
+    then
+        let "SUCCESS++"
+    else
+        let "FAIL++"
+        echo "$COUNTER - Fail $param"
+    fi
+    rm -f "${s21_command[@]}".log "${sys_command[@]}".log
+}
+
+echo "^^^^^^^^^^^^^^^^^^^^^^^"
+echo "TESTS WITH NORMAL FLAGS"
+echo "^^^^^^^^^^^^^^^^^^^^^^^"
+printf "\n"
+echo "#######################"
+echo "MANUAL TESTS"
+echo "#######################"
+printf "\n"
+echo "wait..."
+for i in "${manual[@]}"
 do
-  ./s21_cat $i > s21_cat_res
-  cat $i > cat_res
-  DIFF_RES="$(diff -s s21_cat_res cat_res)"
-  if [ "$DIFF_RES" == "Files s21_cat_res and cat_res are identical" ]
-  then
-    SUCCESS=$((SUCCESS + 1))
-    echo "TEST $TEST_COUNT --------------- RESULT: -----SUCCESS----- $i"
-  else
-    FAILED=$((FAILED + 1))
-    echo "TEST $TEST_COUNT --------------- RESULT: -----FAILED----- $i"
-  fi
-  TEST_COUNT=$((TEST_COUNT + 1))
+    var="-"
+    testing $i
 done
 
+printf "\n"
+echo "#######################"
+echo "AUTOTESTS"
+echo "#######################"
+printf "\n"
+echo "======================="
+echo "1 PARAMETER"
+echo "======================="
+printf "\n"
+echo "wait..."
+for var1 in "${flags[@]}"
+do
+    for i in "${tests[@]}"
+    do
+        var="-$var1"
+        testing $i
+    done
+done
 
-if [ $FAILED == 0 ]
-then
-  echo "-----------TOTAL RESULT: SUCCESS!!-----------"
-else
-  echo "-----------TOTAL RESULT: FAILED $FAILED!!-----------"
-fi
+printf "\n"
+echo "======================="
+echo "2 PARAMETERS"
+echo "======================="
+printf "\n"
+echo "wait..."
+for var1 in "${flags[@]}"
+do
+    for var2 in "${flags[@]}"
+    do
+        if [ $var1 != $var2 ]
+        then
+            for i in "${tests[@]}"
+            do
+                var="-$var1 -$var2"
+                testing $i
+            done
+        fi
+    done
+done
 
-cd ..
+printf "\n"
+echo "======================="
+echo "3 PARAMETERS"
+echo "======================="
+printf "\n"
+echo "wait..."
+for var1 in "${flags[@]}"
+do
+    for var2 in "${flags[@]}"
+    do
+        for var3 in "${flags[@]}"
+        do
+            if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
+            then
+                for i in "${tests[@]}"
+                do
+                    var="-$var1 -$var2 -$var3"
+                    testing $i
+                done
+            fi
+        done
+    done
+done
+
+printf "\n"
+echo "======================="
+echo "4 PARAMETERS"
+echo "======================="
+printf "\n"
+echo "wait..."
+for var1 in "${flags[@]}"
+do
+    for var2 in "${flags[@]}"
+    do
+        for var3 in "${flags[@]}"
+        do
+            for var4 in "${flags[@]}"
+            do
+                if [ $var1 != $var2 ] && [ $var2 != $var3 ] \
+                && [ $var1 != $var3 ] && [ $var1 != $var4 ] \
+                && [ $var2 != $var4 ] && [ $var3 != $var4 ]
+                then
+                    for i in "${tests[@]}"
+                    do
+                        var="-$var1 -$var2 -$var3 -$var4"
+                        testing $i
+                    done
+                fi
+            done
+        done
+    done
+done
+
+printf "\n"
+echo "#######################"
+echo "AUTOTESTS"
+echo "#######################"
+printf "\n"
+echo "======================="
+echo "DOUBLE PARAMETER"
+echo "======================="
+printf "\n"
+echo "wait..."
+for var1 in "${flags[@]}"
+do
+    for var2 in "${flags[@]}"
+    do
+        if [ $var1 != $var2 ]
+        then
+            for i in "${tests[@]}"
+            do
+                var="-$var1$var2"
+                testing "$i"
+            done
+        fi
+    done
+done
+
+printf "\n"
+echo "#######################"
+echo "AUTOTESTS"
+echo "#######################"
+printf "\n"
+echo "======================="
+echo "TRIPLE PARAMETER"
+echo "======================="
+printf "\n"
+echo "wait..."
+for var1 in "${flags[@]}"
+do
+    for var2 in "${flags[@]}"
+    do
+        for var3 in "${flags[@]}"
+        do
+            if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
+            then
+                for i in "${tests[@]}"
+                do
+                    var="-$var1$var2$var3"
+                    testing "$i"
+                done
+            fi
+        done
+    done
+done
+
+printf "\n"
+echo "FAIL: $FAIL"
+echo "SUCCESS: $SUCCESS"
+echo "ALL: $COUNTER"
+printf "\n"
